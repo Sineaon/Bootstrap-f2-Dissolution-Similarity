@@ -23,5 +23,6 @@ Mendyk A et al. Dissolut Technol, 2013, 20(1): 13–17.
 <img width="1005" height="912" alt="image" src="https://github.com/user-attachments/assets/a6eea224-1ba0-498b-9248-de145f725f98" />
 另有html网页版计算模版
 <img width="2226" height="1005" alt="image" src="https://github.com/user-attachments/assets/6b1d912c-7f2a-42b0-936c-87458443b413" />
+<img width="2223" height="921" alt="image" src="https://github.com/user-attachments/assets/6c27c8ad-26c2-4bae-8d35-d337f20a96d7" />
 
 
