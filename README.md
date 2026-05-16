@@ -17,3 +17,11 @@ Bootstrap 法估计 f2 下置信限（f2*）
 Windows + Microsoft Excel，需启用宏（VBA）
 📚 引用 / Citation
 Mendyk A et al. Dissolut Technol, 2013, 20(1): 13–17.
+<img width="1455" height="402" alt="image" src="https://github.com/user-attachments/assets/6824504f-1d27-4d3e-8714-23503dcce06c" />
+<img width="1461" height="405" alt="image" src="https://github.com/user-attachments/assets/15ba2f41-cab6-442c-80e1-564a3fc18a8d" />
+<img width="1017" height="408" alt="image" src="https://github.com/user-attachments/assets/d2043162-e1a4-4c23-bf73-66a404f712be" />
+<img width="1005" height="912" alt="image" src="https://github.com/user-attachments/assets/a6eea224-1ba0-498b-9248-de145f725f98" />
+另有html网页版计算模版
+<img width="2226" height="1005" alt="image" src="https://github.com/user-attachments/assets/6b1d912c-7f2a-42b0-936c-87458443b413" />
+
+
