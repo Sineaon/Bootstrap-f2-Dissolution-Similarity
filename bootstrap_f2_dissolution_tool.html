@@ -1,0 +1,545 @@
+
+<h2 class="sr-only">Bootstrap f2 dissolution profile similarity analysis — enter reference and test dissolution data, set parameters, and run bootstrap to get confidence intervals and similarity decision.</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:12px;display:flex;flex-direction:column;gap:10px;font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px}
+.sec-label{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px}
+.tabs{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:10px}
+.tab{padding:7px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px}
+.tab.on{color:#085041;border-bottom-color:#1D9E75;font-weight:500}
+.tbl-wrap{overflow:auto;max-height:200px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:12px}
+th{background:var(--color-background-secondary);padding:5px 7px;text-align:center;font-weight:500;font-size:11px;color:var(--color-text-secondary);position:sticky;top:0;z-index:1;border-bottom:0.5px solid var(--color-border-secondary)}
+td{border-bottom:0.5px solid var(--color-border-tertiary);padding:1px 2px}
+td.time-cell{background:var(--color-background-secondary);font-weight:500;font-size:12px;text-align:center;padding:4px 8px;color:var(--color-text-secondary)}
+td input[type=number]{width:100%;border:none;background:transparent;text-align:center;font-size:12px;font-family:var(--font-mono);color:var(--color-text-primary);padding:3px 4px;outline:none}
+td input[type=number]:focus{background:var(--color-background-info);border-radius:3px}
+.paste-toggle{font-size:12px;color:#1D9E75;cursor:pointer;margin-top:7px;display:inline-flex;align-items:center;gap:4px;background:none;border:none;padding:0}
+.paste-panel{display:none;margin-top:8px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:10px;background:var(--color-background-secondary)}
+.paste-panel.open{display:block}
+.paste-panel textarea{width:100%;height:100px;font-size:12px;font-family:var(--font-mono);padding:7px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;display:block}
+.paste-hint{font-size:11px;color:var(--color-text-secondary);margin:5px 0 8px}
+.paste-btns{display:flex;gap:7px}
+.paste-btns button{padding:5px 14px;border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)}
+.paste-btns button.ok{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.params-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px}
+.param-item{display:flex;flex-direction:column;gap:3px}
+.param-label{font-size:11px;color:var(--color-text-secondary);font-weight:500}
+.param-item select,.param-item input[type=number]{font-size:13px;padding:6px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-primary);width:100%}
+.run-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.run-btn{background:#0F6E56;color:#fff;border:none;border-radius:var(--border-radius-md);padding:10px 22px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px}
+.run-btn:hover{background:#085041}
+.run-btn:disabled{background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:not-allowed}
+.prog-wrap{flex:1;min-width:120px;display:flex;align-items:center;gap:8px}
+.prog-bar{flex:1;height:6px;background:var(--color-background-secondary);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:#1D9E75;border-radius:3px;width:0%;transition:width .12s}
+.prog-txt{font-size:12px;color:var(--color-text-secondary);min-width:34px;font-family:var(--font-mono)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.met{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 8px;text-align:center}
+.met.key{border:1.5px solid #1D9E75}
+.met-lbl{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.met-val{font-size:20px;font-weight:500;font-family:var(--font-mono)}
+.result-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.badge{display:inline-block;padding:5px 14px;border-radius:20px;font-weight:500;font-size:13px}
+.badge.sim{background:#E1F5EE;color:#085041}
+.badge.nosim{background:#FCEBEB;color:#791F1F}
+.detail-box{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:8px 12px;border-radius:var(--border-radius-md);margin-bottom:10px;line-height:1.6}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chart-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px}
+.chart-lbl{font-size:11px;color:var(--color-text-secondary);font-weight:500;margin-bottom:7px}
+.chart-wrap{position:relative;width:100%;height:170px}
+.warn-box{background:#FAEEDA;border:0.5px solid #BA7517;border-radius:var(--border-radius-md);padding:6px 10px;font-size:11px;color:#633806;margin-top:7px;display:none}
+.err-msg{font-size:12px;color:#791F1F;margin-top:6px;display:none}
+</style>
+
+<div class="wrap">
+
+<div class="card" style="background:linear-gradient(135deg,#04342C,#0F6E56);border-color:#085041;padding:12px 16px">
+  <div style="display:flex;align-items:center;gap:10px">
+    <i class="ti ti-flask" style="font-size:20px;color:#9FE1CB" aria-hidden="true"></i>
+    <div>
+      <div style="font-size:15px;font-weight:500;color:#E1F5EE">Bootstrap f2 溶出相似性分析工具</div>
+      <div style="font-size:11px;color:#5DCAA5">Dissolution Similarity · Bootstrap CI · Mendyk et al., Dissolut Technol 2013</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="sec-label">溶出数据输入 Dissolution Data</div>
+  <div class="tabs">
+    <button class="tab on" id="tab-ref-btn" onclick="switchTab('ref')">参考制剂 Reference</button>
+    <button class="tab" id="tab-tst-btn" onclick="switchTab('tst')">测试制剂 Test</button>
+  </div>
+
+  <div id="pane-ref">
+    <div class="tbl-wrap"><table id="tbl-ref"></table></div>
+    <div class="warn-box" id="warn-ref"></div>
+    <button class="paste-toggle" onclick="togglePaste('ref')">
+      <i class="ti ti-clipboard-text" style="font-size:14px" aria-hidden="true"></i>
+      粘贴 Excel 数据 / Paste from Excel
+    </button>
+    <div class="paste-panel" id="paste-ref">
+      <textarea id="ta-ref" placeholder="格式 Format: 第1列=时间(min)，之后各列=批次溶出%，Tab分隔，无表头&#10;Col1=time(min), next cols=batch dissolution%, tab-separated, no header&#10;&#10;示例 Example:&#10;3&#9;16.7&#9;15.9&#9;18.2&#10;5&#9;37.8&#9;36.5&#9;38.9&#10;7&#9;55.9&#9;54.2&#9;56.8"></textarea>
+      <p class="paste-hint">从 Excel 选中数据区域 → Ctrl+C → 在此粘贴 / Select cells in Excel → Ctrl+C → Paste here</p>
+      <div class="paste-btns">
+        <button onclick="togglePaste('ref')">取消 Cancel</button>
+        <button class="ok" onclick="doImport('ref')">导入 Import</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pane-tst" style="display:none">
+    <div class="tbl-wrap"><table id="tbl-tst"></table></div>
+    <div class="warn-box" id="warn-tst"></div>
+    <button class="paste-toggle" onclick="togglePaste('tst')">
+      <i class="ti ti-clipboard-text" style="font-size:14px" aria-hidden="true"></i>
+      粘贴 Excel 数据 / Paste from Excel
+    </button>
+    <div class="paste-panel" id="paste-tst">
+      <textarea id="ta-tst" placeholder="格式同上 Same format as reference"></textarea>
+      <p class="paste-hint">从 Excel 选中数据区域 → Ctrl+C → 在此粘贴 / Select cells in Excel → Ctrl+C → Paste here</p>
+      <div class="paste-btns">
+        <button onclick="togglePaste('tst')">取消 Cancel</button>
+        <button class="ok" onclick="doImport('tst')">导入 Import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="sec-label">参数设置 Parameters</div>
+  <div class="params-grid">
+    <div class="param-item">
+      <span class="param-label">Bootstrap 次数</span>
+      <input type="number" id="p-nboot" value="2000" min="100" max="20000" step="100">
+    </div>
+    <div class="param-item">
+      <span class="param-label">置信区间 CI (%)</span>
+      <input type="number" id="p-ci" value="90" min="50" max="99" step="1">
+    </div>
+    <div class="param-item">
+      <span class="param-label">采样模式 Sampling</span>
+      <select id="p-mode">
+        <option value="whole">整体向量 Whole vectors</option>
+        <option value="indiv">单点采样 Individual values</option>
+      </select>
+    </div>
+    <div class="param-item">
+      <span class="param-label">85% 截断规则 Auto-rule</span>
+      <select id="p-rule">
+        <option value="2profiles">2-profiles (FDA 推荐)</option>
+        <option value="1profile">1-profile</option>
+        <option value="no_auto">无截断 No auto</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="padding:12px 16px">
+  <div class="run-row">
+    <button class="run-btn" id="run-btn" onclick="startBoot()">
+      <i class="ti ti-player-play" style="font-size:15px" aria-hidden="true"></i>
+      运行 Bootstrap / Run
+    </button>
+    <div class="prog-wrap">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <span class="prog-txt" id="prog-txt"></span>
+    </div>
+  </div>
+  <div class="err-msg" id="err-msg"></div>
+</div>
+
+<div class="card" id="results-card" style="display:none">
+  <div class="result-header">
+    <span style="font-size:15px;font-weight:500">分析结果 Results</span>
+    <span id="badge"></span>
+  </div>
+  <div class="metrics">
+    <div class="met"><div class="met-lbl">f1 原始值</div><div class="met-val" id="r-f1">—</div></div>
+    <div class="met"><div class="met-lbl">f2 原始值</div><div class="met-val" id="r-f2">—</div></div>
+    <div class="met key"><div class="met-lbl">f2* 下置信限 (关键)</div><div class="met-val" id="r-f2lo" style="color:#085041">—</div></div>
+    <div class="met"><div class="met-lbl">f2 上置信限</div><div class="met-val" id="r-f2hi">—</div></div>
+  </div>
+  <div class="detail-box" id="r-detail"></div>
+  <div class="charts-row">
+    <div class="chart-box">
+      <div class="chart-lbl">溶出曲线均值对比 Mean Dissolution Profiles</div>
+      <div class="chart-wrap"><canvas id="c-profiles" role="img" aria-label="Dissolution profiles reference vs test">Mean dissolution profiles for reference and test products over time.</canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-lbl">Bootstrap f2 分布 Distribution (n=<span id="r-nboot">—</span>)</div>
+      <div class="chart-wrap"><canvas id="c-dist" role="img" aria-label="Bootstrap f2 value distribution histogram">Histogram of bootstrap f2 values with confidence interval markers.</canvas></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+var refData, testData, timePoints;
+var chProf = null, chDist = null;
+var isRunning = false;
+
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function boxMuller(rng) {
+  var u1 = Math.max(rng(), 1e-10), u2 = rng();
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
+function initDefault() {
+  timePoints = [3, 5, 7, 10, 15, 30];
+  var rM = [15.34,36.57,50.49,68.47,77.63,90.23];
+  var rS = [3.23,4.07,5.95,6.50,6.39,7.32];
+  var tM = [8.01,21.80,43.06,65.83,75.50,84.23];
+  var tS = [3.42,3.55,4.28,6.56,8.75,10.33];
+  var rng = mulberry32(42);
+  refData = rM.map(function(m, i) {
+    return Array.from({length: 12}, function() {
+      return Math.min(100, Math.max(0, m + rS[i] * boxMuller(rng)));
+    });
+  });
+  testData = tM.map(function(m, i) {
+    return Array.from({length: 12}, function() {
+      return Math.min(100, Math.max(0, m + tS[i] * boxMuller(rng)));
+    });
+  });
+}
+
+function rowMean(arr) {
+  return arr.reduce(function(a, b) { return a + b; }, 0) / arr.length;
+}
+function rowSD(arr) {
+  var m = rowMean(arr);
+  return Math.sqrt(arr.reduce(function(s, v) { return s + (v - m) * (v - m); }, 0) / Math.max(arr.length - 1, 1));
+}
+function rowRSD(arr) {
+  var m = rowMean(arr);
+  return m === 0 ? 0 : rowSD(arr) / m * 100;
+}
+
+function buildTable(tableId, data) {
+  var tbl = document.getElementById(tableId);
+  if (!tbl || !data || data.length === 0) return;
+  var nBat = data[0].length;
+  var src = '<tr><th>时间(min)</th>';
+  for (var b = 0; b < nBat; b++) src += '<th>B' + (b + 1) + '</th>';
+  src += '<th style="color:#1D9E75">Mean</th><th style="color:#1D9E75">RSD%</th></tr>';
+  for (var ti = 0; ti < timePoints.length; ti++) {
+    src += '<tr><td class="time-cell">' + timePoints[ti] + '</td>';
+    var tiCopy = ti;
+    for (var bi = 0; bi < nBat; bi++) {
+      var biCopy = bi;
+      src += '<td><input type="number" step="0.01" value="' + data[ti][bi].toFixed(2) +
+        '" data-ti="' + ti + '" data-bi="' + bi + '" data-tbl="' + tableId + '" onchange="onCell(this)"></td>';
+    }
+    var mn = rowMean(data[ti]).toFixed(1);
+    var rv = rowRSD(data[ti]).toFixed(1);
+    var rsdColor = (ti === 0 && parseFloat(rv) > 20) || (ti > 0 && parseFloat(rv) > 10) ? '#791F1F' : 'var(--color-text-secondary)';
+    src += '<td style="text-align:center;font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary)">' + mn + '</td>';
+    src += '<td style="text-align:center;font-size:11px;font-family:var(--font-mono);color:' + rsdColor + '">' + rv + '</td>';
+    src += '</tr>';
+  }
+  tbl.innerHTML = src;
+  checkRSD();
+}
+
+function onCell(inp) {
+  var ti = parseInt(inp.dataset.ti);
+  var bi = parseInt(inp.dataset.bi);
+  var tbl = inp.dataset.tbl;
+  var val = parseFloat(inp.value) || 0;
+  var d = tbl === 'tbl-ref' ? refData : testData;
+  d[ti][bi] = val;
+  buildTable(tbl, d);
+}
+
+function checkRSD() {
+  ['ref', 'tst'].forEach(function(key) {
+    var data = key === 'ref' ? refData : testData;
+    var warn = document.getElementById('warn-' + key);
+    if (!data || !warn) return;
+    var bad = [];
+    timePoints.forEach(function(t, i) {
+      var maxRSD = i === 0 ? 20 : 10;
+      var rv = rowRSD(data[i]);
+      if (rv > maxRSD) bad.push('t=' + t + 'min (' + rv.toFixed(1) + '%)');
+    });
+    if (bad.length > 0) {
+      warn.style.display = 'block';
+      warn.textContent = '⚠ RSD超标，须用Bootstrap: ' + bad.join(' · ');
+    } else {
+      warn.style.display = 'none';
+    }
+  });
+}
+
+function switchTab(which) {
+  document.getElementById('pane-ref').style.display = which === 'ref' ? 'block' : 'none';
+  document.getElementById('pane-tst').style.display = which === 'tst' ? 'block' : 'none';
+  document.getElementById('tab-ref-btn').className = 'tab' + (which === 'ref' ? ' on' : '');
+  document.getElementById('tab-tst-btn').className = 'tab' + (which === 'tst' ? ' on' : '');
+}
+
+function togglePaste(key) {
+  var panel = document.getElementById('paste-' + key);
+  var isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) document.getElementById('ta-' + key).focus();
+}
+
+function doImport(key) {
+  var raw = document.getElementById('ta-' + key).value.trim();
+  if (!raw) { showErr('请先粘贴数据 / Please paste data first'); return; }
+
+  var lines = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  var newTimes = [], newData = [];
+  lines.forEach(function(line) {
+    var parts = line.trim().split(/\t/);
+    if (parts.length < 2) return;
+    var t = parseFloat(parts[0]);
+    if (isNaN(t)) return;
+    var vals = [];
+    for (var i = 1; i < parts.length; i++) {
+      var v = parseFloat(parts[i]);
+      if (!isNaN(v)) vals.push(v);
+    }
+    if (vals.length > 0) { newTimes.push(t); newData.push(vals); }
+  });
+
+  if (newTimes.length < 3) {
+    showErr('至少需要3个时间点 / Need at least 3 time points. Found: ' + newTimes.length);
+    return;
+  }
+  var maxB = Math.max.apply(null, newData.map(function(r) { return r.length; }));
+  newData = newData.map(function(r) {
+    while (r.length < maxB) r.push(r[r.length - 1] || 0);
+    return r;
+  });
+
+  timePoints = newTimes;
+  if (key === 'ref') { refData = newData; buildTable('tbl-ref', refData); }
+  else { testData = newData; buildTable('tbl-tst', testData); }
+
+  document.getElementById('ta-' + key).value = '';
+  document.getElementById('paste-' + key).classList.remove('open');
+  showErr('');
+}
+
+function showErr(msg) {
+  var el = document.getElementById('err-msg');
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function getAutoMask(refM, tstM, rule) {
+  var n = refM.length, mask = [];
+  for (var i = 0; i < n; i++) mask.push(true);
+  if (rule === 'no_auto') return mask;
+  for (var i = 0; i < n; i++) {
+    var cond = rule === '2profiles' ? (refM[i] > 85 && tstM[i] > 85) : (refM[i] > 85 || tstM[i] > 85);
+    if (cond) { for (var j = i; j < n; j++) mask[j] = false; break; }
+  }
+  return mask;
+}
+
+function calcF1(refM, tstM, mask) {
+  var num = 0, den = 0;
+  for (var i = 0; i < refM.length; i++) {
+    if (mask[i]) { num += Math.abs(refM[i] - tstM[i]); den += refM[i]; }
+  }
+  return den > 0 ? (num / den) * 100 : 0;
+}
+
+function calcF2(refM, tstM, mask) {
+  var sq = 0, n = 0;
+  for (var i = 0; i < refM.length; i++) {
+    if (mask[i]) { sq += (refM[i] - tstM[i]) * (refM[i] - tstM[i]); n++; }
+  }
+  if (n < 1) return 0;
+  return 50 * Math.log10(100 / Math.sqrt(1 + sq / n));
+}
+
+function startBoot() {
+  if (isRunning) return;
+  showErr('');
+
+  var nBoot = Math.min(20000, Math.max(100, parseInt(document.getElementById('p-nboot').value) || 2000));
+  var ci    = Math.min(99, Math.max(50, parseFloat(document.getElementById('p-ci').value) || 90));
+  var mode  = document.getElementById('p-mode').value;
+  var rule  = document.getElementById('p-rule').value;
+
+  if (!refData || !testData) { showErr('数据未初始化 / Data not initialized'); return; }
+  if (refData.length !== testData.length) {
+    showErr('参考与测试时间点数量不一致 / Time points mismatch: ref=' + refData.length + ' test=' + testData.length);
+    return;
+  }
+
+  var nTP   = timePoints.length;
+  var nRefB = refData[0].length;
+  var nTstB = testData[0].length;
+
+  var refM  = refData.map(function(r) { return rowMean(r); });
+  var tstM  = testData.map(function(r) { return rowMean(r); });
+  var mask0 = getAutoMask(refM, tstM, rule);
+  var f1o   = calcF1(refM, tstM, mask0);
+  var f2o   = calcF2(refM, tstM, mask0);
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('prog-txt').textContent = '0%';
+  isRunning = true;
+
+  var boots = [];
+  var idx = 0;
+  var CHUNK = 250;
+
+  function step() {
+    var end = Math.min(idx + CHUNK, nBoot);
+    while (idx < end) {
+      var bRefM, bTstM, tp, b, pick;
+      if (mode === 'whole') {
+        bRefM = []; bTstM = [];
+        for (tp = 0; tp < nTP; tp++) { bRefM.push(0); bTstM.push(0); }
+        for (b = 0; b < nRefB; b++) {
+          pick = Math.floor(Math.random() * nRefB);
+          for (tp = 0; tp < nTP; tp++) bRefM[tp] += refData[tp][pick];
+        }
+        for (b = 0; b < nTstB; b++) {
+          pick = Math.floor(Math.random() * nTstB);
+          for (tp = 0; tp < nTP; tp++) bTstM[tp] += testData[tp][pick];
+        }
+        for (tp = 0; tp < nTP; tp++) { bRefM[tp] /= nRefB; bTstM[tp] /= nTstB; }
+      } else {
+        bRefM = []; bTstM = [];
+        for (tp = 0; tp < nTP; tp++) {
+          var sumR = 0, sumT = 0;
+          for (b = 0; b < nRefB; b++) sumR += refData[tp][Math.floor(Math.random() * nRefB)];
+          for (b = 0; b < nTstB; b++) sumT += testData[tp][Math.floor(Math.random() * nTstB)];
+          bRefM.push(sumR / nRefB);
+          bTstM.push(sumT / nTstB);
+        }
+      }
+      var bMask = getAutoMask(bRefM, bTstM, rule);
+      boots.push(calcF2(bRefM, bTstM, bMask));
+      idx++;
+    }
+
+    var pct = Math.round(idx / nBoot * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-txt').textContent = pct + '%';
+
+    if (idx < nBoot) {
+      setTimeout(step, 0);
+    } else {
+      finalize(f1o, f2o, boots, ci, nBoot, mask0, refM, tstM);
+    }
+  }
+  setTimeout(step, 0);
+}
+
+function finalize(f1o, f2o, boots, ci, nBoot, mask0, refM, tstM) {
+  boots.sort(function(a, b) { return a - b; });
+  var n = boots.length;
+  var alpha = (100 - ci) / 2 / 100;
+  var loI = Math.max(0, Math.round(alpha * n) - 1);
+  var hiI = Math.min(n - 1, Math.round((1 - alpha) * n));
+  var f2lo = boots[loI];
+  var f2hi = boots[hiI];
+  var f2mn = boots.reduce(function(a, b) { return a + b; }, 0) / n;
+  var isSim = f2lo > 50;
+  var usedPts = mask0.filter(Boolean).length;
+
+  document.getElementById('r-f1').textContent = f1o.toFixed(2);
+  document.getElementById('r-f2').textContent = f2o.toFixed(2);
+  document.getElementById('r-f2lo').textContent = f2lo.toFixed(2);
+  document.getElementById('r-f2lo').style.color = isSim ? '#085041' : '#791F1F';
+  document.getElementById('r-f2hi').textContent = f2hi.toFixed(2);
+  document.getElementById('r-nboot').textContent = nBoot;
+
+  document.getElementById('badge').innerHTML = '<span class="badge ' + (isSim ? 'sim' : 'nosim') + '">' +
+    (isSim ? '✓ 相似 SIMILAR' : '✗ 不相似 NOT SIMILAR') + '</span>';
+
+  var detailHtml = '<strong>f2* = ' + f2lo.toFixed(2) + '</strong>（' + ci + '% 下置信限 lower CI）&nbsp;→&nbsp;' +
+    (isSim ? 'f2* > 50，溶出曲线<strong>相似</strong>' : 'f2* ≤ 50，不能确认相似。建议将处方 f2 提升至约 <strong>' + Math.ceil(f2o + (f2o - f2lo) + 2) + '</strong> 以上后重新验证') +
+    '&nbsp;|&nbsp;使用时间点 ' + usedPts + '/' + timePoints.length +
+    '&nbsp;|&nbsp;Bootstrap 均值 ' + f2mn.toFixed(2);
+  document.getElementById('r-detail').innerHTML = detailHtml;
+
+  document.getElementById('results-card').style.display = 'block';
+
+  drawProfiles(refM, tstM);
+  drawDist(boots, f2lo, f2hi, ci);
+
+  document.getElementById('run-btn').disabled = false;
+  isRunning = false;
+}
+
+function drawProfiles(refM, tstM) {
+  if (chProf) { chProf.destroy(); chProf = null; }
+  chProf = new Chart(document.getElementById('c-profiles'), {
+    type: 'line',
+    data: {
+      labels: timePoints,
+      datasets: [
+        { label: 'Reference', data: refM, borderColor: '#185FA5', backgroundColor: 'rgba(24,95,165,0.08)',
+          pointRadius: 4, pointBackgroundColor: '#185FA5', tension: 0.3, borderWidth: 2 },
+        { label: 'Test', data: tstM, borderColor: '#0F6E56', backgroundColor: 'rgba(15,110,86,0.08)',
+          pointRadius: 4, pointBackgroundColor: '#0F6E56', tension: 0.3, borderWidth: 2,
+          borderDash: [5, 3] }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: '时间 Time (min)', font: { size: 10 } }, ticks: { font: { size: 10 } } },
+        y: { title: { display: true, text: 'Q (%)', font: { size: 10 } }, min: 0, max: 100, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+function drawDist(boots, f2lo, f2hi, ci) {
+  if (chDist) { chDist.destroy(); chDist = null; }
+  var minV = Math.max(20, Math.floor(boots[0] / 5) * 5 - 5);
+  var maxV = Math.min(100, Math.ceil(boots[boots.length - 1] / 5) * 5 + 5);
+  var bins = 18;
+  var step = (maxV - minV) / bins;
+  var labels = [], counts = [], colors = [];
+  for (var i = 0; i < bins; i++) {
+    var lo = minV + i * step, hi = minV + (i + 1) * step;
+    var mid = (lo + hi) / 2;
+    labels.push(mid.toFixed(1));
+    var cnt = 0;
+    for (var j = 0; j < boots.length; j++) { if (boots[j] >= lo && boots[j] < hi) cnt++; }
+    counts.push(cnt);
+    colors.push(mid < 50 ? 'rgba(162,45,45,0.75)' : mid <= f2lo ? 'rgba(186,117,23,0.6)' : 'rgba(15,110,86,0.72)');
+  }
+  chDist = new Chart(document.getElementById('c-dist'), {
+    type: 'bar',
+    data: { labels: labels, datasets: [{ data: counts, backgroundColor: colors, borderWidth: 0, borderRadius: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { title: { display: true, text: 'f2 值', font: { size: 10 } }, ticks: { maxTicksLimit: 8, font: { size: 10 } } },
+        y: { title: { display: true, text: '频次', font: { size: 10 } }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+initDefault();
+buildTable('tbl-ref', refData);
+buildTable('tbl-tst', testData);
+</script>
